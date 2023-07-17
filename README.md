@@ -115,3 +115,5 @@ This program is distributed in the hope that it will be useful, but WITHOUT ANY 
 You should have received a copy of the GNU Affero General Public License along with this program. If not, see https://www.gnu.org/licenses/.
 
 The author is not affiliated with the Skailar development team and created this wrapper for personal use and thought it might be helpful to others. This wrapper is to be used at your own risk.
+
+Also, this was not made by using fetch because the built-in fetch does not support proxies by default, and I don't want to use an workaround.
