@@ -3,6 +3,10 @@
     "version": "1.0.0",
     "description": "An unoficial wrapper made for the Skailar API",
     "main": "dist/src/index.js",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/tockawaffle/Skailar-Api.git"
+    },
     "scripts": {
         "copy": "cpy types/index.d.ts dist/",
         "build": "tsc -p tsconfig.json && npm run copy",
