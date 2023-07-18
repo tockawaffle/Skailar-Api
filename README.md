@@ -13,7 +13,7 @@ The Proxy handler is 100% not a thing to be used with a single API, but I am laz
 Firstly, you need to install the SkailarChat package by running:
 
 ```bash
-npm install skailar
+npm install skailar-api
 ```
 
 ### How to Use

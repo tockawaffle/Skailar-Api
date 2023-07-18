@@ -1,5 +1,5 @@
 {
-    "name": "skailar",
+    "name": "skailar-api",
     "version": "1.0.0",
     "description": "An unoficial wrapper made for the Skailar API",
     "main": "dist/src/index.js",
