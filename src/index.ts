@@ -1,6 +1,5 @@
 /**
  * @License GNU GPLv3
- * @Author Nixyan
  * @Description Skailar API wrapper for Node.js
  * @Version 1.0.0
  * 
@@ -109,7 +108,7 @@ class SkailarChat {
 
             if (data.model.includes("claude")) {
                 throw new Error(
-                    "Use CreateClaudeChatCompletion instead of CreateChatCompletion for Claude models"
+                    "Use CreateClaudeChatCompletion instead of CreateChatCompletion for Claude models."
                 );
             } else {
                 const response = await client.post("chat/completions", data);
@@ -139,7 +138,7 @@ class SkailarChat {
                 return response.data;
             } else {
                 throw new Error(
-                    "Use CreateChatCompletion instead of CreateClaudeChatCompletion for non Claude models"
+                    "Use CreateChatCompletion instead of CreateClaudeChatCompletion for non Claude models."
                 );
             }
         } catch (error) {
