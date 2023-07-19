@@ -1,5 +1,9 @@
 import SkailarChat from "skailar";
 import { performance } from "perf_hooks";
+import {
+    ChatCompletionResponse,
+    ClaudeChatCompletionResponse,
+} from "../../dist/types";
 
 (async () => {
     const apiKey = "YOUR_API_KEY";
@@ -8,7 +12,7 @@ import { performance } from "perf_hooks";
         const start = performance.now();
         const skailarChat = new SkailarChat(apiKey);
 
-        const chatCompletion = await skailarChat.CreateChatCompletion({
+        const chatCompletion = (await skailarChat.CreateChatCompletion({
             model: "gpt-4-32k",
             messages: [
                 {
@@ -16,8 +20,8 @@ import { performance } from "perf_hooks";
                     content: "Hello, how are you?",
                 },
             ],
-        });
-        console.log(chatCompletion);
+        })) as ChatCompletionResponse;
+
         const end = performance.now();
 
         const executionTime = ((end - start) / 1000).toFixed(2); // Convert to seconds and round to two decimal places
@@ -35,7 +39,7 @@ import { performance } from "perf_hooks";
         const start = performance.now();
         const skailarChat = new SkailarChat(apiKey);
 
-        const chatCompletion = await skailarChat.CreateClaudeChatCompletion({
+        const chatCompletion = (await skailarChat.CreateClaudeChatCompletion({
             messages: ["Human: who are you?", "Assistant:"],
             model: "claude-2",
             max_tokens_to_sample: 100,
@@ -43,7 +47,7 @@ import { performance } from "perf_hooks";
             temperature: 0.7,
             top_p: 0.7,
             top_k: 0.7,
-        });
+        })) as ClaudeChatCompletionResponse;
 
         const end = performance.now();
 
@@ -60,5 +64,5 @@ import { performance } from "perf_hooks";
         }
     }
 
-    await Claude();
+    Promise.all([OpenAi(), Claude()]);
 })();

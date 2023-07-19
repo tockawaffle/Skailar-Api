@@ -30,7 +30,7 @@ import {
     ModelList,
     UsageResponse,
 } from "../types";
-import { AxiosInstance, AxiosProxyConfig } from "axios";
+import { AxiosError, AxiosInstance, AxiosProxyConfig } from "axios";
 
 /**
  * Class for handling interactions with the Skailar API.
@@ -38,18 +38,27 @@ import { AxiosInstance, AxiosProxyConfig } from "axios";
 class SkailarChat {
     private apiKey: string;
     private proxy: AxiosProxyConfig | undefined;
+    private debugLogging: boolean = false;
 
     /**
      * @param {string} apiKey - Your API key for the Skailar API.
      * @param {AxiosProxyConfig} [proxy] - Optional Axios proxy configuration.
      */
-    constructor(apiKey: string, proxy?: AxiosProxyConfig) {
+    constructor(
+        apiKey: string,
+        proxy?: AxiosProxyConfig,
+        debugLogging?: boolean
+    ) {
         this.apiKey = apiKey;
 
         if (proxy) {
             this.proxy = proxy;
         } else {
             this.proxy = undefined;
+        }
+
+        if (debugLogging) {
+            this.debugLogging = debugLogging;
         }
     }
 
@@ -58,7 +67,7 @@ class SkailarChat {
      * @private
      * @returns {Promise<AxiosInstance>} An instance of the API client.
      */
-    private async getInstance(debugLogging: boolean): Promise<AxiosInstance> {
+    private async getInstance(): Promise<AxiosInstance> {
         if (this.proxy) {
             return await new InstanceHandler(
                 "https://api.skailar.net/v1/",
@@ -71,7 +80,7 @@ class SkailarChat {
                     protocol: this.proxy.protocol as "http" | "https",
                     auth: this.proxy.auth,
                 },
-                debugLogging
+                this.debugLogging
             ).getInstance();
         } else {
             return await new InstanceHandler("https://api.skailar.net/v1/", {
@@ -86,7 +95,7 @@ class SkailarChat {
      * @param {any} error - The error to handle.
      */
     private handleError(error: any): never {
-        if (error.response) {
+        if (error.response || error instanceof AxiosError) {
             throw new Error(error.response.data);
         } else {
             throw new Error(error.message);
@@ -94,22 +103,51 @@ class SkailarChat {
     }
 
     /**
+     * Internal function to handle Streamed Responses.
+     * @private
+     * @param {AxiosInstance} instance - The Axios instance to use.
+     * @param {ChatCompletionRequest | ClaudeChatCompletionRequest} data - The data to send.
+     * @returns {Promise<string>} The response data.
+     */
+    private async handleStream(
+        instance: AxiosInstance,
+        data: ClaudeChatCompletionRequest | ChatCompletionRequest
+    ): Promise<string> {
+        return new Promise<string>((resolve, reject) => {
+            instance
+                .post("chat/completions", data, {
+                    responseType: "stream",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                })
+                .then((response) => {
+                    let data = "";
+                    response.data.on(
+                        "data",
+                        (chunk: string) => (data += chunk)
+                    );
+                    response.data.on("end", () => resolve(data));
+                    response.data.on("error", reject);
+                })
+                .catch(reject);
+        });
+    }
+
+    /**
      * Creates a chat completion.
      * @param {ChatCompletionRequest} data - The chat completion request data.
      * @throws {Error} If the model includes "claude".
-     * @returns {Promise<ChatCompletionResponse>} The server's response.
+     * @returns {Promise<ChatCompletionResponse | string>} The server's response.
      */
     public async CreateChatCompletion(
-        data: ChatCompletionRequest,
-        debugLogging: boolean = false
-    ): Promise<ChatCompletionResponse> {
+        data: ChatCompletionRequest
+    ): Promise<ChatCompletionResponse | string> {
         try {
-            const client = await this.getInstance(debugLogging);
+            const client = await this.getInstance();
 
-            if (data.model.includes("claude")) {
-                throw new Error(
-                    "Use CreateClaudeChatCompletion instead of CreateChatCompletion for Claude models."
-                );
+            if (data.stream) {
+                return await this.handleStream(client, data);
             } else {
                 const response = await client.post("chat/completions", data);
 
@@ -124,18 +162,23 @@ class SkailarChat {
      * Creates a Claude chat completion.
      * @param {ClaudeChatCompletionRequest} data - The Claude chat completion request data.
      * @throws {Error} If the model does not include "claude".
-     * @returns {Promise<ClaudeChatCompletionResponse>} The server's response.
+     * @returns {Promise<ClaudeChatCompletionResponse | string>} The server's response.
      */
     public async CreateClaudeChatCompletion(
-        data: ClaudeChatCompletionRequest,
-        debugLogging: boolean = false
-    ): Promise<ClaudeChatCompletionResponse> {
+        data: ClaudeChatCompletionRequest
+    ): Promise<ClaudeChatCompletionResponse | string> {
         try {
-            const client = await this.getInstance(debugLogging);
+            const client = await this.getInstance();
             if (data.model.includes("claude")) {
-                const response = await client.post("chat/completions", data);
-
-                return response.data;
+                if (data.stream) {
+                    return await this.handleStream(client, data);
+                } else {
+                    const response = await client.post(
+                        "chat/completions",
+                        data
+                    );
+                    return response.data;
+                }
             } else {
                 throw new Error(
                     "Use CreateChatCompletion instead of CreateClaudeChatCompletion for non Claude models."
@@ -150,12 +193,10 @@ class SkailarChat {
      * Fetches usage data.
      * @returns {Promise<UsageResponse>} The server's response.
      */
-    public async Usage(debugLogging: boolean = false): Promise<UsageResponse> {
+    public async Usage(): Promise<UsageResponse> {
         try {
-            const client = await this.getInstance(debugLogging);
-
+            const client = await this.getInstance();
             const response = await client.get("usage");
-
             return response.data;
         } catch (error) {
             return this.handleError(error);
@@ -166,12 +207,10 @@ class SkailarChat {
      * Fetches available models.
      * @returns {Promise<ModelList>} The server's response.
      */
-    public async Models(debugLogging: boolean = false): Promise<ModelList> {
+    public async Models(): Promise<ModelList> {
         try {
-            const client = await this.getInstance(debugLogging);
-
+            const client = await this.getInstance();
             const response = await client.get("models");
-
             return response.data;
         } catch (error) {
             return this.handleError(error);

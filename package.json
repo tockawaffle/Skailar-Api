@@ -1,7 +1,7 @@
 {
     "name": "skailar-api",
-    "version": "1.0.0",
-    "description": "An unoficial wrapper made for the Skailar API",
+    "version": "1.5.0",
+    "description": "An wrapper made for the Skailar API",
     "main": "dist/src/index.js",
     "repository": {
         "type": "git",
@@ -10,7 +10,6 @@
     "scripts": {
         "copy": "cpy types/index.d.ts dist/",
         "build": "tsc -p tsconfig.json && npm run copy",
-        "test": "ts-node tests/typescript/index.ts && ts-node tests/javascript/index.mjs",
         "publish": "npm run build && npm publish --access public"
     },
     "author": "Nixyi",

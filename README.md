@@ -1,12 +1,16 @@
-# Skailar Api Usage Guide
+# Skailar Api
+
+[![npm version](https://badge.fury.io/js/skailar-api.svg)](https://badge.fury.io/js/skailar-api)
+
+[![wakatime](https://wakatime.com/badge/user/e0979afa-f854-452d-b8a8-56f9d69eaa3b/project/938676a1-1012-45e5-ac4e-b3ca77eabe14.svg)](https://wakatime.com/badge/user/e0979afa-f854-452d-b8a8-56f9d69eaa3b/project/938676a1-1012-45e5-ac4e-b3ca77eabe14)
+
+[![](https://dcbadge.vercel.app/api/server/skailar)](https://discord.gg/skailar)
 
 ## Introduction
 
-This is an unofficial Node.js wrapper for the Skailar Api. It provides an easy-to-use interface for interacting with the Skailar Api in a Node.js environment.
+This is a wrapper for the [Skailar Api](https://skailar.com/).
 
-I was bored and decided to make this wrapper to make my life easier since I use this API on multiple of my projects. I hope this helps you too.
-
-The Proxy handler is 100% not a thing to be used with a single API, but I am lazy and didn't want to rework the whole thing to accomodate for this single wrapper. So I just made it a thing. If you want to use it, you can. If you don't, you don't have to. It's that simple.
+Made with Axios and TypeScript for better type support.
 
 ### Installation
 
@@ -18,6 +22,41 @@ npm install skailar-api
 
 ### How to Use
 
+<details>
+<summary> CommonJS Compatibility </summary>
+<br>
+This is an ESM package, you might face some issues if you are using CommonJS. I recommend using ESM instead.
+There are workarounds for using ESM packages in CommonJS, such as using "import()" instead of "require()":
+
+```javascript
+(async () => {
+    const SkailarChat = await import("chimera-api");
+
+    const Skailar = SkailarChat.default;
+
+    const apiKey = "YOUR_API_KEY";
+
+    const skailarApi = new Skailar(apiKey);
+
+    const createChatCompletion = await skailarApi.CreateChatCompletion({
+        model: "gpt-4",
+        messages: [
+            {
+                content: "Hello, how are you?",
+                role: "user",
+            },
+        ],
+    });
+
+    console.log(createChatCompletion);
+    process.exit(0);
+})();
+```
+
+No, you can not use top-level awaits in CommonJS. You can use the workaround above or use ESM instead.
+
+</details>
+
 The SkailarChat class provides an easy-to-use interface for interacting with the Skailar API in a Node.js environment.
 
 First, you must import the SkailarChat class:
@@ -26,7 +65,7 @@ First, you must import the SkailarChat class:
 import SkailarChat from "skailar";
 ```
 
-Then, initialize a new instance of SkailarChat using your API key:
+Then, initialize a new instance of SkailarChat using your API key (You can get one by joining this [Discord Server](https://discord.com/invite/skailar)):
 
 ```javascript
 let skailar = new SkailarChat("your-api-key");
@@ -42,19 +81,25 @@ let skailar = new SkailarChat("your-api-key", {
     auth: {
         username: "proxy-username",
         password: "proxy-password",
-    },
+    } /* Optional */,
 });
+```
+
+You can also pass a debugLogging boolean as the third parameter to the constructor to enable debug logging of the Proxy Handler:
+
+```javascript
+let skailar = new SkailarChat("your-api-key", undefined, true);
 ```
 
 The SkailarChat class has a number of public methods:
 
--   CreateChatCompletion(data, debugLogging): Creates a chat completion. Expects a ChatCompletionRequest object as the parameter and optionally a boolean flag for enabling/disabling debugging logs.
+-   CreateChatCompletion(data): Creates a chat completion. Expects a ChatCompletionRequest object as the parameter.
 
--   CreateClaudeChatCompletion(data, debugLogging): Creates a Claude chat completion. Expects a ClaudeChatCompletionRequest object as the parameter and optionally a boolean flag for enabling/disabling debugging logs.
+-   CreateClaudeChatCompletion(data): Creates a Claude chat completion. Expects a ClaudeChatCompletionRequest object as the parameter.
 
--   Usage(debugLogging): Fetches usage data. Optionally expects a boolean flag for enabling/disabling debugging logs.
+-   Usage(): Fetches usage data.
 
--   Models(debugLogging): Fetches available models. Optionally expects a boolean flag for enabling/disabling debugging logs.
+-   Models(): Fetches available models.
 
 #### Example
 
@@ -82,7 +127,7 @@ skailar
 
 ### Note
 
-You might encounter some issues while using any model that is not gpt-4-32k. This is because Skailar Api had some problems with the other models and that wasnt fixed yet (As of 17/07/2023).
+You might encounter some issues while using any model that is not gpt-4-32k. This is because Skailar Api had some problems with the other models and that wasnt fixed yet (As of 17/07/2023 - v1.0.0).
 
 Also note that the 32k model is only available for boosters/donators on their discord server. You can also get access to it giving proper feedback/suggestions/use cases for the model.
 
@@ -117,3 +162,19 @@ You should have received a copy of the GNU Affero General Public License along w
 The author is not affiliated with the Skailar development team and created this wrapper for personal use and thought it might be helpful to others. This wrapper is to be used at your own risk.
 
 Also, this was not made by using fetch because the built-in fetch does not support proxies by default, and I don't want to use an workaround.
+
+### Support and Others
+
+<details>
+<summary> Performance Related Stuff </summary>
+<br>
+
+### Proxy Handler:
+
+The Proxy handler is 100% not a thing to be used with a single API: It provides advanced management of Axios instances, such as per-URL instance caching and optional proxy support. Originally, it was designed for managing multiple API endpoints, hence the proxy handler might seem over-engineered for a single API wrapper. It's optional and doesn't affect the main functionality if not utilized.
+
+TLDR: The Proxy Handler is way too overengineered for a single API wrapper, but it's optional and doesn't affect the main functionality if not utilized.
+
+---
+
+</details>
