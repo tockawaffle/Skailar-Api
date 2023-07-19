@@ -55,6 +55,8 @@ There are workarounds for using ESM packages in CommonJS, such as using "import(
 
 No, you can not use top-level awaits in CommonJS. You can use the workaround above or use ESM instead.
 
+---
+
 </details>
 
 The SkailarChat class provides an easy-to-use interface for interacting with the Skailar API in a Node.js environment.
